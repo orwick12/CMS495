@@ -1,19 +1,18 @@
 from flask import Flask
-from newspaper import Article
+
 
 class Web(object):
-    def __init__(self):
+    def __init__(self, scraper, db):
         self.site = Flask(__name__)
+        self.db = db
+        self.scraper = scraper
         self.routes()
 
-    def getPage(self):
-        url = "https://www.apnews.com/eadc2597c27e449c8952e5bedb6406c7/Amsterdam:-'Terrorist-motive'-alleged-in-attack-on-Americans"
-        article = Article(url)
-        article.download()
-        article.parse()
-        return article.text
+    def getDB(self):
+        self.scraper.generate_news()
+        return self.db.db_query()
 
     def routes(self):
         @self.site.route("/")
         def samplePageContent():
-            return self.getPage()
+            return self.getDB()
