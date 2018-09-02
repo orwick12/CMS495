@@ -8,4 +8,4 @@ class Main(object):
         self.db = DB()
 
 
-Main().web.site.run(host="0.0.0.0", port=5000)
+Main().web.site.run(host="0.0.0.0", port=5000, debug=True)
