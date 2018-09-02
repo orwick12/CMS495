@@ -2,6 +2,7 @@
 
 """ 
     This program was created for educational purposes only.
+    it required sqlite3 to be installed and path included in environment variable.
     Any use of it's content, for other than educational purposes, is strictly     prohibited. 
     License information provided by:
     Andrew Christiano
@@ -15,7 +16,7 @@
 import requests
 from bs4 import BeautifulSoup
 import sqlite3
-import sys
+#import sys
 
 # Build Database
 con = sqlite3.connect('tnc.db')
