@@ -3,8 +3,8 @@
 """ 
     This program was created for educational purposes only.
     it required sqlite3 to be installed and path included in environment variable.
-    Any use of it's content, for other than educational purposes, is strictly     prohibited. 
-    License information provided by:
+    Any use of it's content, for other than educational purposes, is strictly prohibited. 
+    Project Team:
     Andrew Christiano
     Yrume Fernandez
     Brian Orwick
@@ -16,9 +16,9 @@
 import requests
 from bs4 import BeautifulSoup
 import sqlite3
-#import sys
 
-# Build Database
+
+# connect to Sqlite database and build table 
 con = sqlite3.connect('tnc.db')
 with con:
     cur = con.cursor()
@@ -28,7 +28,7 @@ with con:
 # The News Counter Webscraper
 def tncWebscraper():
     
-    # create variables
+    # create list containing news sites to scrape
     web_list = ['https://www.foxnews.com', 'https://www.usatoday.com']
 
     for web_page in web_list:
@@ -56,20 +56,26 @@ def dbRetrieve():
 
 def compareArticle():
     wordcount = 0
-    cur.execute("SELECT * FROM NewsArticle")
-    words=cur.fetchall()
-    for line in words:
+    totalcount= 0
+    cur.execute("SELECT * FROM NewsArticle WHERE Id = 'https://www.foxnews.com'")
+    words1=cur.fetchall()
+    cur.execute("SELECT * FROM NewsArticle WHERE Id = 'https://www.usatoday.com'")
+    words2=cur.fetchall()
+    for line in words1:
         site, id, title, count = line
         word = title.split()
-        #print(type(word))
         for x in word:
-            if x in words:
+            print(x)
+            totalcount= totalcount + 1
+            if x in str(words2):
                 wordcount = wordcount + 1
-                print(wordcount)
+                #print("WordCount= ", wordcount)
+    print(totalcount)
+    print(wordcount)
 
 def main():
     tncWebscraper()
-    dbRetrieve()
+   # dbRetrieve()
     compareArticle()
 
 if __name__=="__main__":
