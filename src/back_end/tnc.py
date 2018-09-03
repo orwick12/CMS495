@@ -17,6 +17,8 @@ import requests
 from bs4 import BeautifulSoup
 import sqlite3
 
+# create list containing news sites to scrape
+web_list = ['https://www.foxnews.com', 'https://www.usatoday.com']
 
 # connect to Sqlite database and build table 
 con = sqlite3.connect('tnc.db')
@@ -28,9 +30,6 @@ with con:
 # The News Counter Webscraper
 def tncWebscraper():
     
-    # create list containing news sites to scrape
-    web_list = ['https://www.foxnews.com', 'https://www.usatoday.com']
-
     for web_page in web_list:
         # set get request for html
         page_response = requests.get(web_page, timeout=5)
@@ -57,25 +56,25 @@ def dbRetrieve():
 def compareArticle():
     wordcount = 0
     totalcount= 0
-    cur.execute("SELECT * FROM NewsArticle WHERE Id = 'https://www.foxnews.com'")
-    words1=cur.fetchall()
-    cur.execute("SELECT * FROM NewsArticle WHERE Id = 'https://www.usatoday.com'")
-    words2=cur.fetchall()
-    for line in words1:
-        site, id, title, count = line
-        word = title.split()
-        for x in word:
-            print(x)
-            totalcount= totalcount + 1
-            if x in str(words2):
-                wordcount = wordcount + 1
-                #print("WordCount= ", wordcount)
+    for web_page in web_list:
+        cur.execute("SELECT * FROM NewsArticle WHERE Id = ?;", (web_page,))
+        words1=cur.fetchall()
+        cur.execute("SELECT * FROM NewsArticle WHERE Id != ?;", (web_page,))
+        words2=cur.fetchall()
+        for line in words1:
+            site, id, title, count = line
+            word = title.split()
+            for x in word:
+                totalcount= totalcount + 1
+                if x in str(words2):
+                    wordcount = wordcount + 1
+    #for testing
     print(totalcount)
     print(wordcount)
 
 def main():
     tncWebscraper()
-   # dbRetrieve()
+    #dbRetrieve()
     compareArticle()
 
 if __name__=="__main__":
