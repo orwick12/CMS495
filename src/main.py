@@ -6,7 +6,7 @@ from src.front_end.Web import Web
 class Main(object):
     def __init__(self):
         self.db = DB()
-        self.scraper = Scraper("https://www.washingtonpost.com/", self.db)
+        self.scraper = Scraper("https://washingtonpost.com/", self.db)
         self.web = Web(self.scraper, self.db)
 
 
