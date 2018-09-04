@@ -64,10 +64,17 @@ def compareArticle():
         for line in words1:
             site, id, title, count = line
             word = title.split()
-            for x in word:
-                totalcount= totalcount + 1
-                if x in str(words2):
-                    wordcount = wordcount + 1
+            for line in words2:
+                site, id, title, count = line
+                words = title.split()
+                for x in word:
+                    totalcount= totalcount + 1
+                    if x in words:
+                        wordcount = wordcount + 1
+        if wordcount / totalcount * 100 >= 70:
+            print("will be sent to database count")
+        else:
+            print("Did not make it")
     #for testing
     print(totalcount)
     print(wordcount)
