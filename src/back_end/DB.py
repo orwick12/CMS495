@@ -1,4 +1,4 @@
-import sqlite3, json
+import sqlite3, json, pprint
 
 
 class DB(object):
@@ -13,7 +13,7 @@ class DB(object):
         c = conn.cursor()
         c.execute("DROP TABLE IF EXISTS " + self.table_name + ";")
         conn.commit()
-        c.execute("CREATE TABLE " + self.table_name + " (published text, url text, content text);")
+        c.execute("CREATE TABLE " + self.table_name + " (id INTEGER PRIMARY KEY AUTOINCREMENT, published text, url text, content text);")
         conn.commit()
         conn.close()
 
@@ -28,18 +28,19 @@ class DB(object):
         conn = sqlite3.connect(self.dbFile)
         c = conn.cursor()
         json_list = []
-        for row in c.execute("SELECT published, url, content FROM " + self.table_name):
+        for row in c.execute("SELECT id, published, url, content FROM {0}".format(self.table_name)):
             json_list.append(self.json_object(row))
         html = "<html>"
-        json_array = json.dumps(json_list)
-        html += json_array
+        html += json.dumps(json_list)
         html += "</html>"
         return html
 
     def json_object(self, row):
         json_object = {
-            "date": row[0],
-            "url": row[1],
-            "content": row[2]
+            "id": row[0],
+            "date": row[1],
+            "url": row[2],
+            "content": row[3],
+            "similar_to_id": []
         }
         return json_object

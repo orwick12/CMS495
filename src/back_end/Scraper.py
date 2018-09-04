@@ -2,18 +2,16 @@ import newspaper
 
 
 class Scraper(object):
-    def __init__(self, website, db):
-        self.website = website
+    def __init__(self, websites, db):
+        self.websites = websites
         self.db = db
 
     def generate_news(self):
         articles = self.get_articles()
-        if articles.__len__() == 0:
-            self.generate_news()
         self.parse(articles)
 
     def get_articles(self):
-        paper = newspaper.Source(self.website)
+        paper = newspaper.Source(self.websites)
         paper.download()
         paper.parse()
         paper.set_categories()
