@@ -14,13 +14,19 @@
 
 # import required modules for webscraping and html parsing
 import requests
-from bs4 import BeautifulSoup
+import newspaper
+from newspaper import news_pool
 import sqlite3
 
 # create list containing news sites to scrape
-web_list = ['https://www.foxnews.com', 'https://www.usatoday.com']
+web_list = ['http://www.foxnews.com', 'http://www.usatoday.com']
 
-# connect to Sqlite database and build table 
+# setup newspaper to multi-thread news sources 
+newsWebList = [newspaper.build(i) for i in web_list]
+news_pool.set(newsWebList, threads_per_source=2)
+news_pool.join()
+
+# connect to Sqlite database and initiate / build table 
 con = sqlite3.connect('tnc.db')
 with con:
     cur = con.cursor()
@@ -29,23 +35,20 @@ with con:
 
 # The News Counter Webscraper
 def tncWebscraper():
-    
+    # iterates through sources
     for web_page in web_list:
         # set get request for html
-        page_response = requests.get(web_page, timeout=5)
-        print (page_response)
-
-        page_content = BeautifulSoup(page_response.content, "html.parser")
-
-        textContent = []
         i = 0
-        for p in page_content.find_all("article"):
+        j = 1
+        for article in newsWebList[j].articles:
             #print (i)
-            paragraphs = page_content.find_all("article")[i].text
-            textContent.append(paragraphs)
-            #print (paragraphs)
+            article.download()
+            article.parse()
+            paragraphs = article.title
+            #print(web_page, "   ", paragraphs)
             cur.execute("INSERT INTO NewsArticle VALUES(?,?,?,?)", (web_page, i, paragraphs, 1))
             i = i+1
+        j = j + 1
 
 def dbRetrieve():
     cur.execute("SELECT * FROM NewsArticle")
@@ -64,20 +67,25 @@ def compareArticle():
         for line in words1:
             site, id, title, count = line
             word = title.split()
-            for line in words2:
-                site, id, title, count = line
-                words = title.split()
+            for line2 in words2:
+                site1, id1, title1, count1 = line2
+                words = title1.split()
                 for x in word:
                     totalcount= totalcount + 1
-                    if x in words:
-                        wordcount = wordcount + 1
-        if wordcount / totalcount * 100 >= 70:
-            print("will be sent to database count")
-        else:
-            print("Did not make it")
-    #for testing
-    print(totalcount)
-    print(wordcount)
+                    for y in words:
+                        if x == y:
+                            wordcount = wordcount + 1
+                if wordcount / totalcount * 100 >= 70:
+                    print("will be sent to database count")
+                    #for testing
+                    print("total: ", totalcount, "word: ", wordcount)
+                    print(line)
+                    print(line2)
+                else:
+                    print("Did not make it")
+                    print("total: ", totalcount, "word: ", wordcount)
+                totalcount= 0
+                wordcount= 0                
 
 def main():
     tncWebscraper()
