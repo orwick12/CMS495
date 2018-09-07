@@ -26,9 +26,9 @@ class DB(object):
 
     def db_update(self, objid, json_data):
         conn = sqlite3.connect(self.dbFile)
-        prepared_statement = "UPDATE {tn} SET json = {i} WHERE id = {j}".format(tn=self.table_name, i=objid, j=json_data)
         c = conn.cursor()
-        c.execute(prepared_statement)
+        c.execute("UPDATE {tn} SET json = ? WHERE id = ?".format(tn=self.table_name), (objid, json_data))
+        #conn.commit()
         conn.close()
 
     def db_query(self):
@@ -47,8 +47,18 @@ class DB(object):
     def mass_update(self):
         conn = sqlite3.connect(self.dbFile)
         c = conn.cursor()
-        for row in c.execute("SELECT id, published, url, content FROM {0}".format(self.table_name)):
-            self.filler(row, self.json_object(row))
+        list_of_ids = []
+        for row in c.execute("SELECT id FROM {0}".format(self.table_name)):
+            #self.filler(row, json.dumps(self.json_object(row)))
+            list_of_ids.append(row[0])
+        conn.close()
+        for i in list_of_ids:
+            conn = sqlite3.connect(self.dbFile)
+            c = conn.cursor()
+            for row in c.execute("SELECT id, published, url, content FROM {tn} WHERE id = {i}".format(tn=self.table_name)):
+
+        conn.commit()
+
 
     def filler(self, row, json_data):
         self.db_update(row[0], json_data)
