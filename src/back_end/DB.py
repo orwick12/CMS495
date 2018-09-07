@@ -1,4 +1,4 @@
-import sqlite3, json, pprint
+import sqlite3, json, difflib
 
 
 class DB(object):
@@ -13,7 +13,7 @@ class DB(object):
         c = conn.cursor()
         c.execute("DROP TABLE IF EXISTS " + self.table_name + ";")
         conn.commit()
-        c.execute("CREATE TABLE " + self.table_name + " (id INTEGER PRIMARY KEY AUTOINCREMENT, published text, url text, content text, json text);")
+        c.execute("CREATE TABLE " + self.table_name + " (id INTEGER PRIMARY KEY AUTOINCREMENT, published text, url text, content text, counted_content text);")
         conn.commit()
         conn.close()
 
@@ -24,51 +24,42 @@ class DB(object):
         conn.commit()
         conn.close()
 
-    def db_update(self, objid, json_data):
+    def db_update(self, objid, qualifier, input):
         conn = sqlite3.connect(self.dbFile)
         c = conn.cursor()
-        c.execute("UPDATE {tn} SET json = ? WHERE id = ?".format(tn=self.table_name), (objid, json_data))
-        #conn.commit()
+        c.execute("UPDATE {tn} SET {q} = ? WHERE id = ?".format(tn=self.table_name, q=qualifier), (input, objid))
+        conn.commit()
         conn.close()
 
     def db_query(self):
+        self.bag_of_words()
         conn = sqlite3.connect(self.dbFile)
         c = conn.cursor()
         json_list = []
-        self.mass_update()
-        for row in c.execute("SELECT json FROM {0}".format(self.table_name)):
-            json_list.append(json.loads(row))
+        for row in c.execute("SELECT counted_content FROM {0}".format(self.table_name)):
+            json_list.append(row)
         conn.close()
         html = "<html>"
         html += json.dumps(json_list)
         html += "</html>"
         return html
 
-    def mass_update(self):
+    def bag_of_words(self):
         conn = sqlite3.connect(self.dbFile)
         c = conn.cursor()
-        list_of_ids = []
-        for row in c.execute("SELECT id FROM {0}".format(self.table_name)):
-            #self.filler(row, json.dumps(self.json_object(row)))
-            list_of_ids.append(row[0])
-        conn.close()
-        for i in list_of_ids:
-            conn = sqlite3.connect(self.dbFile)
-            c = conn.cursor()
-            for row in c.execute("SELECT id, published, url, content FROM {tn} WHERE id = {i}".format(tn=self.table_name)):
-
+        key_pair = {}
+        for row in c.execute("SELECT id, content FROM {0}".format(self.table_name)):
+            key_pair[row[0]] = str(self.count_content(row))
         conn.commit()
+        conn.close()
+        conn = sqlite3.connect(self.dbFile)
+        c = conn.cursor()
+        for k, v in key_pair.items():
+            c.execute("UPDATE {tn} SET counted_content = ? WHERE id = ?".format(tn=self.table_name), (v, k))
+        conn.commit()
+        conn.close()
 
-
-    def filler(self, row, json_data):
-        self.db_update(row[0], json_data)
-
-    def json_object(self, row):
-        json_object = {
-            "id": row[0],
-            "date": row[1],
-            "url": row[2],
-            "content": row[3],
-            "similar_to_id": []
-        }
-        return json_object
+    def count_content(self, row):
+        content = str(row[1]).split(" ")
+        unsorted = dict([i, content.count(i)] for i in content)
+        return sorted(unsorted.items(), key=lambda x: x[1], reverse=True)
