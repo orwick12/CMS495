@@ -1,4 +1,4 @@
-import sqlite3, json, difflib
+import sqlite3, json
 
 
 class DB(object):
@@ -61,5 +61,4 @@ class DB(object):
 
     def count_content(self, row):
         content = str(row[1]).split(" ")
-        unsorted = dict([i, content.count(i)] for i in content)
-        return sorted(unsorted.items(), key=lambda x: x[1], reverse=True)
+        return dict([i, content.count(i)] for i in content)
