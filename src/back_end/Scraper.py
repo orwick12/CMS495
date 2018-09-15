@@ -7,19 +7,12 @@ class Scraper(object):
         self.db = db
 
     def generate_news(self):
-        articles = self.get_articles()
-        self.parse(articles)
+        for site in self.websites:
+            articles = self.get_articles(site)
+            self.parse(articles)
 
-    def get_articles(self):
-        paper = newspaper.Source(self.websites)
-        paper.download()
-        paper.parse()
-        paper.set_categories()
-        paper.download_categories()
-        paper.parse_categories()
-        paper.set_feeds()
-        paper.download_feeds()
-        paper.generate_articles()
+    def get_articles(self, site):
+        paper = newspaper.build(site)
         return paper.articles
 
     def parse(self, articles):
