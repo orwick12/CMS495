@@ -10,4 +10,4 @@ class Main(object):
         self.web = Web(self.scraper, self.db)
 
 
-Main().web.site.run(host="0.0.0.0", port=5000, debug=True)
+

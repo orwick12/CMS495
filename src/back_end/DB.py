@@ -43,21 +43,6 @@ class DB(object):
         html = self.mass(row, html)
         return html
 
-    def bag_of_words(self):
-        conn = sqlite3.connect(self.dbFile)
-        c = conn.cursor()
-        key_pair = {}
-        for row in c.execute("SELECT id, content FROM {0}".format(self.table_name)):
-            key_pair[row[0]] = str(self.count_content(row))
-        conn.commit()
-        conn.close()
-        conn = sqlite3.connect(self.dbFile)
-        c = conn.cursor()
-        for k, v in key_pair.items():
-            c.execute("UPDATE {tn} SET counted_content = ?, num_uniq_words = ? WHERE id = ?".format(tn=self.table_name), (v, len(json.dumps(v)), k))
-        conn.commit()
-        conn.close()
-
     def mass(self, row, html):
         conn = sqlite3.connect(self.dbFile)
         try:
