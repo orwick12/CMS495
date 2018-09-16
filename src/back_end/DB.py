@@ -7,7 +7,7 @@ class DB(object):
         self.version = 1
         self.dbFile = "tnc.db"
         self.table_name = "ARTICLE"
-        self.create_table()
+        # self.create_table()
 
     def create_table(self):
         conn = sqlite3.connect(self.dbFile)
