@@ -10,11 +10,12 @@ class Web(object):
 
     def getDB(self):
         self.scraper.generate_news()
-        return self.db.db_query()
+        return self.db.print_items()
+
 
     def routes(self):
         @self.site.route("/")
         def samplePageContent():
-            #return self.getDB()
-            print("hi")
-            return render_template("index.html")
+            return self.getDB()
+            #print("hi")
+            #return render_template("index.html")

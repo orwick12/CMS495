@@ -1,5 +1,7 @@
 import sqlite3, json
 
+from flask import render_template
+
 
 class DB(object):
     def __init__(self):
@@ -43,6 +45,13 @@ class DB(object):
         html += json.dumps(json_list)
         html += "</html>"
         return html
+
+    def print_items(self):
+        conn = sqlite3.connect(self.dbFile)
+        c = conn.cursor()
+        row = c.execute('SELECT published,url FROM {0}'.format(self.table_name))
+        return render_template('index.html', items=row.fetchall())
+
 
     def bag_of_words(self):
         conn = sqlite3.connect(self.dbFile)
