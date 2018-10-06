@@ -17,10 +17,14 @@ class Scraper(object):
 
     def parse(self, articles):
         for article in articles:
-            url, date, content = self.download(article)
-            self.db.db_insert(url=url, date=date, content=content)
+            try:
+                url, date, content, authors = self.download(article)
+                self.db.db_insert(url=url, date=date, content=content, authors=authors)
+            except Exception as e:
+                print(e)
 
     def download(self, article):
         article.download()
         article.parse()
-        return article.url, article.publish_date, article.text
+        authors = " ".join(str(x) for x in article.authors)
+        return article.url, article.publish_date, article.text, authors
