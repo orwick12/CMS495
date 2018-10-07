@@ -12,12 +12,6 @@
     </script>
 </head>
 <body>
-<div id="data">nothing received yet</div>
-{% for i content|safe: %}
-<script>
-  $("#data").text("{{ i }} {{ c }}")
-</script>
-{% endfor %}
 {{ content|safe }}
 </body>
 </html>
