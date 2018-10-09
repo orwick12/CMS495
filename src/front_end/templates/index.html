@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TNC</title>
+    <meta name="description" content="Trusted News Code">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="CMSC495 Group 3">
+    <title>Trusted News Source</title>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/style.css') }}">
+
 <script src="../js/jquery-3.3.1.min.js"></script>
     <script type="javascript">
         function ajaxRequest() {
@@ -12,6 +17,18 @@
     </script>
 </head>
 <body>
-{{ content|safe }}
+    <div id="wrapper">
+        <h1>Trusted News Source</h1>
+
+        <div class="nav">
+            <ul id="navigation">
+                <li><a href="index.html">Home</a> &#160;&#160;</li>
+            </ul>
+        </div>
+        {{ content|safe }}
+    </div>
+    <div id = "footer">Copyright &#169; 2018 CMSC495 Group3<br/>
+        <a href="mailto:borwick@umuc.edu">Email us</a>
+    </div>
 </body>
 </html>
