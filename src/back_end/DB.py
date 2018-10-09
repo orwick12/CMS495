@@ -1,71 +1,67 @@
 import sqlite3
-import json
 
 
 class DB(object):
     def __init__(self):
-        self.version = 1
         self.dbFile = "tnc.db"
-        self.table_name = "ARTICLE"
+        self.table_name_article = "ARTICLE"
+        self.table_name_metadata = "METADATA"
         # self.create_table()
 
     def create_table(self):
         conn = sqlite3.connect(self.dbFile)
         c = conn.cursor()
-        c.execute("DROP TABLE IF EXISTS " + self.table_name + ";")
+        c.execute("DROP TABLE IF EXISTS " + self.table_name_article + ";")
+        c.execute("DROP TABLE IF EXISTS " + self.table_name_metadata + ";")
         conn.commit()
-        c.execute("CREATE TABLE " + self.table_name + " (id INTEGER PRIMARY KEY AUTOINCREMENT, published text, url text, content text, counted_content text, num_uniq_words INTEGER);")
+        c.execute("CREATE TABLE " + self.table_name_article + " (ARTICLE_ID INTEGER PRIMARY KEY AUTOINCREMENT, URL text NOT NULL, AUTHOR text NOT NULL, PUBLISH_DATE text NOT NULL, CONTENT text NOT NULL, FOREIGN KEY (ARTICLE_ID) REFERENCES ARTICLE (ARTICLE_ID));")
+        c.execute("CREATE TABLE " + self.table_name_metadata + " (METADATA_ID INTEGER PRIMARY KEY AUTOINCREMENT, ARTICLE_ID_1 INTEGER NOT NULL, ARTICLE_ID_2 INTEGER NOT NULL, PERCENT_MATCH REAL NOT NULL, FOREIGN KEY (ARTICLE_ID_1) REFERENCES ARTICLE (ARTICLE_ID_1), FOREIGN KEY (ARTICLE_ID_2) REFERENCES ARTICLE (ARTICLE_ID_2));")
         conn.commit()
         conn.close()
 
-    def db_insert(self, date, url, content):
+    def db_insert(self, date, url, content, authors):
         conn = sqlite3.connect(self.dbFile)
         c = conn.cursor()
-        c.execute("INSERT INTO {tn} (published, url, content) VALUES (?, ?, ?)".format(tn=self.table_name), (date, url, content))
+        if authors == " ":
+            authors = "Unknown"
+        if date is None:
+            date = "Unknown"
+        c.execute("INSERT INTO {tn} (URL, AUTHOR, PUBLISH_DATE, CONTENT) VALUES (?, ?, ?, ?)".format(tn=self.table_name_article), (url, authors, date, content))
+        conn.commit()
+        conn.close()
+
+    def db_related_insert(self, ARTICLE_ID_1, ARTICLE_ID_2, PERCENT_MATCH):
+        conn = sqlite3.connect(self.dbFile)
+        c = conn.cursor()
+        c.execute("INSERT INTO {tn} (ARTICLE_ID_1, ARTICLE_ID_2, PERCENT_MATCH) VALUES (?, ?, ?)".format(tn=self.table_name_metadata), (ARTICLE_ID_1, ARTICLE_ID_2, PERCENT_MATCH))
         conn.commit()
         conn.close()
 
     def db_update(self, objid, qualifier, input):
         conn = sqlite3.connect(self.dbFile)
         c = conn.cursor()
-        c.execute("UPDATE {tn} SET {q} = ? WHERE id = ?".format(tn=self.table_name, q=qualifier), (input, objid))
+        c.execute("UPDATE {tn} SET {q} = ? WHERE id = ?".format(tn=self.table_name_article, q=qualifier), (input, objid))
         conn.commit()
         conn.close()
 
     def db_query(self):
-        html = ""
         conn = sqlite3.connect(self.dbFile)
         c = conn.cursor()
-        c.execute("SELECT id, content, url FROM {t} LIMIT 1".format(t=self.table_name))
-        row = c.fetchone()
+        c.execute("SELECT Count(ARTICLE_ID) FROM {t}".format(t=self.table_name_article))
+        count = c.fetchone()[0]
         conn.close()
-        html += self.mass_compare(row)
-        html = self.mass(row, html)
-        return html
-
-    def mass(self, row, html):
-        conn = sqlite3.connect(self.dbFile)
-        try:
-            print(row[0])
+        for i in range(0, count):
+            conn = sqlite3.connect(self.dbFile)
             c = conn.cursor()
-            c.execute("SELECT id, content, url FROM {t} LIMIT 1 OFFSET {k}".format(t=self.table_name, k=int(row[0])))
+            c.execute("SELECT ARTICLE_ID, CONTENT, URL FROM {t} LIMIT 1 OFFSET {k}".format(t=self.table_name_article, k=i))
             row = c.fetchone()
-            if row is None:
-                conn.close()
-                return html
             conn.close()
-            html += self.mass_compare(row)
-            html = self.mass(row, html)
-            return html
-        except sqlite3.Error as e:
-            html = "An error occurred: {0}".format(e.args[0])
-            conn.close()
-            return html
+            yield self.mass_compare(row)
 
     def mass_compare(self, row):
         conn = sqlite3.connect(self.dbFile)
         c = conn.cursor()
-        c.execute("SELECT id, content, url FROM {t} LIMIT -1 OFFSET {k}".format(t=self.table_name, k=int(row[0])))
+        c.execute("SELECT ARTICLE_ID, CONTENT, URL FROM {t} LIMIT -1 OFFSET {k}".format(t=self.table_name_article, k=int(row[0])))
         a = row
         html = ""
         while True:
@@ -79,8 +75,13 @@ class DB(object):
                     html += "id's {c} and {d} have {v} percent word match<br/>".format(v=p*100, c=a[0], d=b[0])
                     html += "url for a is <a href='{i}'>{i}</a><br/>".format(i=a[2])
                     html += "url for b is <a href='{j}'>{j}</a><br/>".format(j=b[2])
-                # else:
-                #    html += "id's {c} and {d} do not match...<br/>".format(c=a[0], d=b[0])
+                    # self.db_related_insert(ARTICLE_ID_1=a[0], ARTICLE_ID_2=b[0], PERCENT_MATCH=p)
+                    # return html
+                else:
+                    html += "id's {c} and {d} do not match...<br/>".format(c=a[0], d=b[0])
+                    html += "url for a is <a href='{i}'>{i}</a><br/>".format(i=a[2])
+                    html += "url for b is <a href='{j}'>{j}</a><br/>".format(j=b[2])
+                    # return html
             except sqlite3.Error as e:
                 html += "An error occurred: {0}".format(e.args[0])
                 conn.close()
@@ -99,6 +100,8 @@ class DB(object):
                     counter += 1
                     # print("{i} {j}".format(i=v1/v2, j=counter))
         percent = float(counter)/float(len(dict1))
+        if len(dict1) is 1:
+            percent = 0.0
         return percent
 
     def count_content(self, row):

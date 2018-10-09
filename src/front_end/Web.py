@@ -15,7 +15,13 @@ class Web(object):
         )
         self.routes()
         # self.getDB()
-        # self.results = self.get_results()
+
+    def stream_template(self, template_name, **context):
+        self.site.update_template_context(context)
+        t = self.site.jinja_env.get_template(template_name)
+        rv = t.stream(context)
+        rv.enable_buffering(5)
+        return rv
 
     def getDB(self):
         self.scraper.generate_news()
@@ -26,10 +32,9 @@ class Web(object):
     def routes(self):
         @self.site.route("/")
         def tncPageContent():
-            content = "hello world!<br />Hi!<br />"
             # content = self.get_results()
-            return Response(self.stream_template('index.html', content=content))
-            # return Response(self.get_results())
+            # return Response(self.stream_template('index.html', content=self.db.db_query()))
+            return Response(stream_with_context(self.db.db_query()))
 
         @self.site.route("/js/<jscript>")
         def js(jscript):
