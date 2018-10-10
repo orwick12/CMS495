@@ -1,4 +1,5 @@
 import sqlite3
+import json
 
 
 class DB(object):
@@ -19,14 +20,14 @@ class DB(object):
         conn.commit()
         conn.close()
 
-    def db_insert(self, date, url, content, authors):
+    def db_insert(self, date, url, content, authors, title):
         conn = sqlite3.connect(self.dbFile)
         c = conn.cursor()
         if authors == " ":
             authors = "Unknown"
         if date is None:
             date = "Unknown"
-        c.execute("INSERT INTO {tn} (URL, AUTHOR, PUBLISH_DATE, CONTENT) VALUES (?, ?, ?, ?)".format(tn=self.table_name_article), (url, authors, date, content))
+        c.execute("INSERT INTO {tn} (URL, AUTHOR, PUBLISH_DATE, CONTENT, TITLE) VALUES (?, ?, ?, ?, ?)".format(tn=self.table_name_article), (url, authors, date, content, title))
         conn.commit()
         conn.close()
 
@@ -53,17 +54,42 @@ class DB(object):
         for i in range(0, count):
             conn = sqlite3.connect(self.dbFile)
             c = conn.cursor()
-            c.execute("SELECT ARTICLE_ID, CONTENT, URL FROM {t} LIMIT 1 OFFSET {k}".format(t=self.table_name_article, k=i))
+            c.execute("SELECT ARTICLE.ARTICLE_ID, ARTICLE.CONTENT, ARTICLE.URL, ARTICLE.TITLE, ARTICLE.PUBLISH_DATE, ARTICLE.AUTHOR FROM {t} LIMIT 1 OFFSET {k}".format(t=self.table_name_article, k=i))
             row = c.fetchone()
             conn.close()
             yield self.mass_compare(row)
 
+    def jsonify(self, row, percent_match):
+
+        json_obj={
+            "id": row[0],
+            "url": row[2],
+            "title": row[3],
+            "date": row[4],
+            "author": row[5],
+            "percent_match": percent_match
+        }
+        return json_obj
+
     def mass_compare(self, row):
         conn = sqlite3.connect(self.dbFile)
         c = conn.cursor()
-        c.execute("SELECT ARTICLE_ID, CONTENT, URL FROM {t} LIMIT -1 OFFSET {k}".format(t=self.table_name_article, k=int(row[0])))
+        c.execute("SELECT ARTICLE.ARTICLE_ID, ARTICLE.CONTENT, ARTICLE.URL, ARTICLE.TITLE, ARTICLE.PUBLISH_DATE, ARTICLE.AUTHOR FROM {t} LIMIT -1 OFFSET {k}".format(t=self.table_name_article, k=int(row[0])))
         a = row
         html = ""
+        json_obj = {
+            "id": row[0],
+            "url": row[2],
+            "title": row[3],
+            "date": row[4],
+            "author": row[5],
+            "alike": {
+
+            },
+            "not_alike": {
+
+            }
+        }
         while True:
             try:
                 b = c.fetchone()
@@ -78,6 +104,7 @@ class DB(object):
                     html += "url for a is <a href='{i}'>{i}</a><br/>".format(i=a[2])
                     html += "url for b is <a href='{j}'>{j}</a><br/>".format(j=b[2])
                     print("id's {c} and {d} have {v} percent word match".format(v=p*100, c=a[0], d=b[0]))
+                    json_obj["alike"][b[0]] = self.jsonify(b, p*100)
                     # self.db_related_insert(ARTICLE_ID_1=a[0], ARTICLE_ID_2=b[0], PERCENT_MATCH=p)
                     # return html
                 else:
@@ -85,12 +112,13 @@ class DB(object):
                     html += "url for a is <a href='{i}'>{i}</a><br/>".format(i=a[2])
                     html += "url for b is <a href='{j}'>{j}</a><br/>".format(j=b[2])
                     print("id's {c} and {d} do not match with a {v} percent match".format(c=a[0], d=b[0],v=p*100))
+                    json_obj["not_alike"][b[0]] = self.jsonify(b, p*100)
                     # return html
             except sqlite3.Error as e:
                 html += "An error occurred: {0}".format(e.args[0])
                 conn.close()
         conn.close()
-        return html
+        return json.dumps(json_obj)
 
     def compare(self, dict1, dict2):
         counter = 0
@@ -100,7 +128,7 @@ class DB(object):
                 v1 = float(dict1.get(key))
                 v2 = float(v2)
                 v = v2/v1
-                if v > .7:
+                if v > .85:
                     counter += 1
                     # print("{i} {j}".format(i=v1/v2, j=counter))
         percent = float(counter)/float(len(dict1))

@@ -19,8 +19,8 @@ class Scraper(object):
         for article in articles:
             try:
                 if article.url.endswith("html"):
-                    url, date, content, authors = self.download(article)
-                    self.db.db_insert(url=url, date=date, content=content, authors=authors)
+                    url, date, content, authors, title = self.download(article)
+                    self.db.db_insert(url=url, date=date, content=content, authors=authors, title=title)
             except Exception as e:
                 print(e)
 
@@ -28,4 +28,4 @@ class Scraper(object):
         article.download()
         article.parse()
         authors = " ".join(str(x) for x in article.authors)
-        return article.url, article.publish_date, article.text, authors
+        return article.url, article.publish_date, article.text, authors, article.title
