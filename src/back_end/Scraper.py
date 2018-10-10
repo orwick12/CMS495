@@ -18,8 +18,9 @@ class Scraper(object):
     def parse(self, articles):
         for article in articles:
             try:
-                url, date, content, authors = self.download(article)
-                self.db.db_insert(url=url, date=date, content=content, authors=authors)
+                if article.url.endswith("html"):
+                    url, date, content, authors = self.download(article)
+                    self.db.db_insert(url=url, date=date, content=content, authors=authors)
             except Exception as e:
                 print(e)
 
