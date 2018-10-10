@@ -1,5 +1,3 @@
-from back_end.DB import DB
-from back_end.Scraper import Scraper
 from front_end.Web import Web
 from back_end.TNC import TNC
 from threading import Timer
