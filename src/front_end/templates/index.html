@@ -25,7 +25,9 @@
                 <li><a href="index.html">Home</a> &#160;&#160;</li>
             </ul>
         </div>
-        {{ content|safe }}
+         {% for item in content %}  <!--json.dumps(json_obj)-->
+            {{ item }}
+        {% endfor %}
     </div>
     <div id = "footer">Copyright &#169; 2018 CMSC495 Group3<br/>
         <a href="mailto:borwick@umuc.edu">Email us</a>
