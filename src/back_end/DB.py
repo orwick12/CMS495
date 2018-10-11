@@ -118,7 +118,8 @@ class DB(object):
                 html += "An error occurred: {0}".format(e.args[0])
                 conn.close()
         conn.close()
-        return json.dumps(json_obj)
+        return json_obj
+        # return json.dumps(json_obj)
 
     def compare(self, dict1, dict2):
         counter = 0

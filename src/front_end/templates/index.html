@@ -25,9 +25,15 @@
                 <li><a href="index.html">Home</a> &#160;&#160;</li>
             </ul>
         </div>
+        <table>
          {% for item in content %}  <!--json.dumps(json_obj)-->
-            {{ item }}
+             <tr>
+             <td>
+           ID: {{ item.id }} Author: {{ item.author }} Article:  {{ item.title }}
+             </td>
+             </tr>
         {% endfor %}
+        </table>
     </div>
     <div id = "footer">Copyright &#169; 2018 CMSC495 Group3<br/>
         <a href="mailto:borwick@umuc.edu">Email us</a>
