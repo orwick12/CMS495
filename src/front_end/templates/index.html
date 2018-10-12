@@ -7,8 +7,9 @@
     <meta name="author" content="CMSC495 Group 3">
     <title>Trusted News Source</title>
 
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/style.css') }}">
 
-<script src="../js/jquery-3.3.1.min.js"></script>
+<script src="../static/js/jquery-3.3.1.min.js"></script>
     <script type="javascript">
         function ajaxRequest() {
             console.log("hello!");
@@ -19,12 +20,9 @@
 <body>
     <div id="wrapper">
         <h1>Trusted News Source</h1>
-
-        <div class="nav">
-            <ul id="navigation">
-                <li><a href="index.html">Home</a> &#160;&#160;</li>
-            </ul>
-        </div>
+        <h2>We search articles on the websites of provided news organizations to retrieve news articles,
+            count the number of times an article is found, and provide the user a list of articles ranked
+            with their trustworthiness</h2>
         <script>
             table = document.getElementById("table");
                 var urls = [];
@@ -37,34 +35,38 @@
                     }, 0);
                     console.log("count " + count + " Author: " + url + " id: " + id);
                     if(count != null){
+
+                        //document.getElementById('rate').appendChild(count)
                         document.getElementById('rate').innerHTML = count;
                     }
                     else{
                         document.getElementById('rate').innerHTML = "No Author";
                     }
                 }
+                // function reliabilitySort(){}
             </script>
-
+        <!--<button onclick="reliabilitySort()">Sort by most reliable</button> -->
         <table id="table">
 
             <tr>
-                <th>Rating</th>
+                <th>Trust Worthy<br>Rating</th>
                 <th>ID</th>
                 <th>Author</th>
-                <th>Title</th>
+                <th>Article Title</th>
             </tr>
              {% for item in content %}
                     <tr>
-                        <td><span id="rate"></span></td>
+                        <td><span id=rate></span></td>
                         <td>{{ item.id }}</td>
                         <td>{{ item.author }} </td>
-                        <td>{{ item.title }}</td>
+                        <td><a href="{{ item.url }}">{{ item.title }}</a></td>
                         <script>countArticle('{{ item.author }}', '{{ item.id }}')</script>
-
                     </tr>
             {% endfor %}
         </table>
     </div>
+
+    <br>
     <div id = "footer">Copyright &#169; 2018 CMSC495 Group3<br/>
         <a href="mailto:borwick@umuc.edu">Email us</a>
     </div>
