@@ -6,9 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="CMSC495 Group 3">
     <title>Trusted News Source</title>
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/style.css') }}">
 
-<script src="../js/jquery-3.3.1.min.js"></script>
+
+<script src="../js/jquery-3.3.1.min.js">
+    count = 0;
+</script>
     <script type="javascript">
         function ajaxRequest() {
             console.log("hello!");
@@ -25,14 +27,35 @@
                 <li><a href="index.html">Home</a> &#160;&#160;</li>
             </ul>
         </div>
+
+
         <table>
-         {% for item in content %}  <!--json.dumps(json_obj)-->
-             <tr>
-             <td>
-           ID: {{ item.id }} Author: {{ item.author }} Article:  {{ item.title }}
-             </td>
-             </tr>
-        {% endfor %}
+            <script>
+                var urls = [];
+
+                function countArticle(url, id) {
+                    var search = url;
+                    urls.push(url);
+                    var count = urls.reduce(function(n, val) {
+                        return n + (val === search);
+                    }, 0);
+                    console.log("count " + count + " Author: " + url + " id: " + id);
+                    if(count != null){
+                        document.getElementById('rate').innerHTML = count;
+                    }
+                    else{
+                        document.getElementById('rate').innerHTML = "No Author";
+                    }
+                }
+            </script>
+             {% for item in content %}
+                    <tr>
+                        <td>
+                            Rating: <span id="rate"></span> ID: {{ item.id }} Author: {{ item.author }} Article:  {{ item.title }}
+                            <script>countArticle('{{ item.author }}', '{{ item.id }}')</script>
+                        </td>
+                    </tr>
+            {% endfor %}
         </table>
     </div>
     <div id = "footer">Copyright &#169; 2018 CMSC495 Group3<br/>
