@@ -32,9 +32,8 @@ class Web(object):
     def routes(self):
         @self.site.route("/")
         def tncPageContent():
-            # content = self.get_results()
-            # return Response(self.stream_template('index.html', content=self.db.db_query()))
-            return Response(stream_with_context(self.db.db_query()))
+            content = self.get_results()
+            return Response(stream_with_context(self.stream_template('index.html', content=content)))
 
         @self.site.route("/js/<jscript>")
         def js(jscript):

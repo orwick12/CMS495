@@ -2,16 +2,65 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TNC</title>
-<script src="../js/jquery-3.3.1.min.js"></script>
-    <script type="javascript">
-        function ajaxRequest() {
-            console.log("hello!");
-        }
-        setInterval(ajaxRequest, 5000);
-    </script>
+    <meta name="description" content="Trusted News Code">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="CMSC495 Group 3">
+    <title>Trusted News Source</title>
+
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/style.css') }}">
+
+<script src="../static/js/jquery-3.3.1.min.js"></script>
+
 </head>
 <body>
-{{ content|safe }}
+    <div id="wrapper">
+        <h1>Trusted News Source</h1>
+        <h2>We search articles on the websites of provided news organizations to retrieve news articles,
+            count the number of times an article is found, and provide the user a list of articles ranked
+            with their trustworthiness</h2>
+        <script>
+                function add_to_alike(id1, json_obj){
+                    let t = document.getElementById("alike_stories")
+                    let v = JSON.parse(json_obj)
+                    let add_entry = "<td>"+id1+"</td><td>"+v[1]["id"]+"</td><td>"+v[1]["percent_match"]+"</td>";
+                    t.innerHTML += add_entry
+                }
+                // function reliabilitySort(){}
+            </script>
+        <!--<button onclick="reliabilitySort()">Sort by most reliable</button> -->
+        <table id="alike_stories" border="1">
+            <tr>
+                <th>ID 1</th>
+                <th>ID 2</th>
+                <th>Percent match</th>
+            <tr>
+        </table>
+        <table id="table" border="1">
+
+            <tr>
+                <th>Trust Worthy<br>Rating</th>
+                <th>ID</th>
+                <th>Author</th>
+                <th>Article Title</th>
+            </tr>
+             {% for item in content %}
+                    <tr>
+                        <td>{{ item["alike"]|length }}</td>
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.author }} </td>
+                        <td><a href="{{ item.url }}">{{ item.title }}</a></td>
+                        {% for alike in item["alike"].items() %}
+                            <script>add_to_alike('{{ item.id }}', '{{  alike |tojson }}')</script>
+                            <script>console.log('{{ alike |tojson }}')</script>
+                        {% endfor %}
+                    </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <br>
+    <div id = "footer">Copyright &#169; 2018 CMSC495 Group3<br/>
+        <a href="mailto:borwick@umuc.edu">Email us</a>
+    </div>
 </body>
 </html>
