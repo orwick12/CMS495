@@ -27,19 +27,37 @@
             table = document.getElementById("table");
                 var urls = [];
 
+                function ratingCount(likeness, url, id) {
+                    var search = url;
+
+                    urls.push(url);
+
+                    var count = urls.reduce(function (n, val) {
+                        return n + (val === search);
+                    }, 0);
+                    console.log("count " + count + " likeness: " + likeness.length + " id: " + id);
+                    if (likeness.length > 2) {
+                            count += 1;
+                        }
+                    if (count > 2 ) {
+                        document.getElementById(id).innerHTML = count;
+                    }
+                    else{
+                        document.getElementById(id).innerHTML = 'No rating';
+                        }
+                }
+
                 function countArticle(url, id) {
                     var search = url;
                     urls.push(url);
-                    var count = urls.reduce(function(n, val) {
+                    var count = urls.reduce(function (n, val) {
                         return n + (val === search);
                     }, 0);
                     console.log("count " + count + " Author: " + url + " id: " + id);
-                    if(count != null){
-
-                        //document.getElementById('rate').appendChild(count)
-                        document.getElementById('rate').innerHTML = count;
+                    if (count != null) {
+                        document.getElementById(id).innerHTML = count;
                     }
-                    else{
+                    else {
                         document.getElementById('rate').innerHTML = "No Author";
                     }
                 }
@@ -56,11 +74,11 @@
             </tr>
              {% for item in content %}
                     <tr>
-                        <td><span id=rate></span></td>
-                        <td>{{ item.id }}</td>
+                        <td><span id={{ item.id }}></span></td>
+                        <td>{{ item.id}} </td>
                         <td>{{ item.author }} </td>
                         <td><a href="{{ item.url }}">{{ item.title }}</a></td>
-                        <script>countArticle('{{ item.author }}', '{{ item.id }}')</script>
+                        <script>ratingCount('{{ item["alike"] }}','{{ item.url }}', '{{ item.id }}')</script>
                     </tr>
             {% endfor %}
         </table>
