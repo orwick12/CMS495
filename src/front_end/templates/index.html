@@ -19,10 +19,10 @@
             count the number of times an article is found, and provide the user a list of articles ranked
             with their trustworthiness</h2>
         <script>
-                function add_to_alike(id1, json_obj){
+                function add_to_alike(id1, url, json_obj){
                     let t = document.getElementById("alike_stories")
                     let v = JSON.parse(json_obj)
-                    t.innerHTML += "<td>"+id1+"</td><td>"+v[1]["id"]+"</td><td>"+v[1]["percent_match"]+"</td><td><a href=\"mailto:borwick@umuc.edu\">Email us</a></td>";
+                    t.innerHTML += "<td><a href="+url+">"+id1+"</a></td><td><a href="+v[1]["url"]+">"+v[1]["id"]+"</a></td><td>"+v[1]["percent_match"]+"</td><td><a href=\"mailto:borwick@umuc.edu\">Email us</a></td>";
                 }
                 // function reliabilitySort(){}
             </script>
@@ -50,7 +50,7 @@
                         <td>{{ item.author }} </td>
                         <td><a href="{{ item.url }}">{{ item.title }}</a></td>
                         {% for alike in item["alike"].items() %}
-                            <script>add_to_alike('{{ item.id }}', '{{  alike |tojson }}')</script>
+                            <script>add_to_alike('{{ item.id }}', '{{ item.url }}', '{{  alike |tojson }}')</script>
                         {% endfor %}
                     </tr>
             {% endfor %}
