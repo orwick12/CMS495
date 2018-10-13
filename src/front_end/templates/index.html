@@ -22,8 +22,7 @@
                 function add_to_alike(id1, json_obj){
                     let t = document.getElementById("alike_stories")
                     let v = JSON.parse(json_obj)
-                    let add_entry = "<td>"+id1+"</td><td>"+v[1]["id"]+"</td><td>"+v[1]["percent_match"]+"</td>";
-                    t.innerHTML += add_entry
+                    t.innerHTML += "<td>"+id1+"</td><td>"+v[1]["id"]+"</td><td>"+v[1]["percent_match"]+"</td><td><a href=\"mailto:borwick@umuc.edu\">Email us</a></td>";
                 }
                 // function reliabilitySort(){}
             </script>
@@ -33,6 +32,7 @@
                 <th>ID 1</th>
                 <th>ID 2</th>
                 <th>Percent match</th>
+                <th>Report as unrelated</th>
             <tr>
         </table>
         <table id="table" border="1">
@@ -51,7 +51,6 @@
                         <td><a href="{{ item.url }}">{{ item.title }}</a></td>
                         {% for alike in item["alike"].items() %}
                             <script>add_to_alike('{{ item.id }}', '{{  alike |tojson }}')</script>
-                            <script>console.log('{{ alike |tojson }}')</script>
                         {% endfor %}
                     </tr>
             {% endfor %}
